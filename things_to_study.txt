@@ -1,0 +1,11 @@
+Jornada de Dados - Coisas para Estudar
+
+pep8
+don't repeat yourself
+loguru / sentry
+decorator
+git commits
+pydantic / pandera
+ABC
+Classe Abstrata
+Fast API

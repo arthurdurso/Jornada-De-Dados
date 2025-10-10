@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "jdd-013"
+version = "0.1.0"
+description = ""
+authors = ["Durso <dursoarthur@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+schedule = "^1.2.2"
+pandas = "^2.2.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

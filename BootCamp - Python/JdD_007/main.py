@@ -1,0 +1,1 @@
+# Rodar funcoes do funcoes.py
