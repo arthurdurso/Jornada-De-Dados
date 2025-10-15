@@ -104,23 +104,88 @@ HAVING COUNT(o.order_id) > 15
 ORDER BY total_orders DESC;
 
 
+
 -- Aula 4
--- Fazer exercicios amanhã, pq hoje já deu rsrsrs
 
 -- 1. Faça a classificação dos produtos mais venvidos usando RANK(), DENSE_RANK() e ROW_NUMBER()
 -- Essa questão tem 2 implementações, veja uma que utiliza subquery e uma que não utiliza.
 -- Tabelas utilizadas: FROM order_details o JOIN products p ON p.product_id = o.product_id
 
+-- Versão sem subquery
+SELECT 
+       o.product_id,
+       p.product_name,
+       SUM(o.quantity) AS total_quantity
+FROM order_details o
+JOIN products p ON p.product_id = o.product_id
+GROUP BY o.product_id, p.product_name
+ORDER BY total_quantity DESC;
+
+-- Versão com subquery
+SELECT 
+       o.product_id,
+       p.product_name,
+       SUM(o.quantity) AS total_quantity,
+       RANK() OVER (ORDER BY SUM(o.quantity) DESC) AS rank,
+       DENSE_RANK() OVER (ORDER BY SUM(o.quantity) DESC) AS rank_dense,
+       ROW_NUMBER() OVER (ORDER BY SUM(o.quantity) DESC) AS row_number
+FROM order_details o
+JOIN products p ON p.product_id = o.product_id
+GROUP BY o.product_id, p.product_name
+ORDER BY total_quantity DESC;
+
 
 -- 2. Listar funcionários dividindo-os em 3 grupos usando NTILE
 
+SELECT
+       employee_id,
+       first_name,
+       last_name,
+       hire_date,
+       NTILE(3) OVER (ORDER BY hire_date) as hire_group
+FROM employees
+ORDER BY hire_date;
+
+
 -- 3. Ordenando os custos de envio pagos pelos clientes de acordo 
 -- com suas datas de pedido, mostrando o custo anterior e o custo posterior usando LAG e LEAD:
--- FROM orders JOIN shippers ON shippers.shipper_id = orders.ship_via;
+
+
+SELECT customer_id,
+       order_date,
+       LAG(freight) OVER (PARTITION BY customer_id ORDER BY order_date) AS previous_freight,
+       freight AS current_freight,
+       LEAD(freight) OVER (PARTITION BY customer_id ORDER BY order_date) AS next_freight
+FROM orders o
+ORDER BY customer_id, order_date;
+
 
 
 -- Desafio extra: questão intrevista Google
--- https://medium.com/@aggarwalakshima/interview-question-asked-by-google-and-difference-among-row-number-rank-and-dense-rank-4ca08f888486#:~:text=ROW_NUMBER()%20always%20provides%20unique,a%20continuous%20sequence%20of%20ranks.
--- https://platform.stratascratch.com/coding/10351-activity-rank?code_type=3
--- https://www.youtube.com/watch?v=db-qdlp8u3o
+-- https://medium.com/@aggarwalakshima/interview-question-asked-by-google-and-difference-among-row-number-rank-and-dense-rank-4ca08f888486
+
+--Interview Question
+--Find the email activity rank for each user. Email activity rank is defined by the total number of emails sent. The user with the highest number of emails sent will have a rank of 1, and so on. Output the user, total emails, and their activity rank. Order records by the total emails in descending order. Sort users with the same number of emails in alphabetical order.
+--In your rankings, return a unique value (i.e., a unique rank) even if multiple users have the same number of emails. For tie breaker use alphabetical order of the user usernames.
+
+--Table: google_gmail_emails
+--id — int
+--from_user — varchar
+--to_user — varchar
+--day — int
+
+SELECT
+       from_user AS user,
+       COUNT(*) AS total_emails,
+       ROW_NUMBER() OVER (ORDER BY COUNT(*) DESC, from_user) AS activity_rank
+FROM google_gmail_emails
+GROUP BY from_user;
+
+
+
+
+-- Aula 5
+
+-- Projeto (...)
+-- Vou montar o projeto com as questões.
 
