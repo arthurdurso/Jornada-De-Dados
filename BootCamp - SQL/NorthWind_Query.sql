@@ -183,9 +183,14 @@ GROUP BY from_user;
 
 
 
-
 -- Aula 5
 
--- Projeto (...)
--- Vou montar o projeto com as questões.
+-- Project NorthWind Analysis
+-- https://github.com/arthurdurso/Project-NorthWind-Analysis
 
+
+
+-- Aula 6
+
+-- Recriar as consultas do Project NorthWind Analysis em: CTE/Subqueries/Views/Materialized Views/Temporary Tables
+-- Aula foi longa, vou fazer os exercicios na próxima semana.
