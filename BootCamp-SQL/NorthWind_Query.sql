@@ -192,5 +192,68 @@ GROUP BY from_user;
 
 -- Aula 6
 
--- Recriar as consultas do Project NorthWind Analysis em: CTE/Subqueries/Views/Materialized Views/Temporary Tables
--- Aula foi longa, vou fazer os exercicios na próxima semana.
+-- Recriar algumas consultas do Project NorthWind Analysis em: CTE/Subqueries/Views/Materialized Views/Temporary Tables
+
+
+-- 1. Relatórios de Receita
+-- Qual foi o total de receitas no ano de 1997?
+
+-- CTE (Common Table Expression)
+WITH TotalRevenue1997 AS (
+       SELECT 
+              ROUND(SUM(od.unit_price * od.quantity * (1 - od.discount))::NUMERIC, 2) AS total_revenue_1997
+       FROM order_details od
+       JOIN orders o
+       ON od.order_id = o.order_id
+       WHERE EXTRACT(YEAR FROM order_date) = 1997
+)
+SELECT * FROM TotalRevenue1997;
+
+-- 2. Segmentação de clientes
+-- Qual é o valor total que cada cliente já pagou até agora?
+
+-- CTE (Common Table Expression)
+WITH CustomerTotalPaid AS (
+       SELECT  
+              c.contact_name,
+              ROUND(SUM(od.unit_price * od.quantity * (1 - od.discount) + o.freight)::NUMERIC, 2) AS total_paid
+       FROM customers c
+       JOIN orders o ON c.customer_id = o.customer_id
+       JOIN order_details od ON od.order_id = o.order_id
+       GROUP BY c.contact_name
+)
+SELECT * FROM CustomerTotalPaid
+ORDER BY total_paid DESC;
+
+-- 3. Produtos Mais Vendidos
+-- Identificar os 10 produtos mais vendidos.
+
+CREATE VIEW TopSellingProducts AS
+SELECT 
+        p.product_name,
+        SUM(od.quantity) AS total_quantity_sold
+FROM products p
+JOIN order_details od ON p.product_id = od.product_id
+GROUP BY p.product_name
+ORDER BY total_quantity_sold DESC
+LIMIT 10;
+
+-- 4. Clientes do Reino Unido que Pagaram Mais de 1000 Dólares
+
+CREATE MATERIALIZED VIEW UKHighPayingCustomers AS
+SELECT 
+        c.contact_name,
+        ROUND(SUM(od.unit_price * od.quantity * (1 - od.discount) + o.freight)::NUMERIC, 2) AS total_paid
+FROM orders o
+JOIN order_details od ON od.order_id = o.order_id
+JOIN (
+    SELECT 
+            customer_id,
+            contact_name,
+            country
+    FROM customers
+    WHERE UPPER(country) = 'UK'
+) AS c ON c.customer_id = o.customer_id
+GROUP BY c.contact_name
+HAVING SUM(od.unit_price * od.quantity * (1 - od.discount) + o.freight) > 1000
+ORDER BY total_paid DESC;
