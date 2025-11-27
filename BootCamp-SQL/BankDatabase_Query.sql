@@ -70,3 +70,43 @@ WHERE id = 1;
 UPDATE clients
 SET saldo = 0
 WHERE id = 1;
+
+
+
+-- Aula 8
+-- Procedures
+
+CREATE OR REPLACE PROCEDURE see_extration(
+    IN p_cliente_id INTEGER
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    balance INTEGER;
+    transac RECORD;
+    count INTEGER := 0;
+BEGIN
+    -- Obtém o saldo atual do cliente
+    SELECT saldo INTO balance
+    FROM clients
+    WHERE id = p_cliente_id;
+
+    -- Retorna o saldo atual do cliente
+    RAISE NOTICE 'Saldo atual do cliente: %', balance;
+
+    -- Retorna as 10 últimas transações do cliente
+    RAISE NOTICE 'Últimas 10 transações do cliente:';
+    FOR transac IN
+        SELECT *
+        FROM transactions
+        WHERE cliente_id = p_cliente_id
+        ORDER BY realizada_em DESC
+        LIMIT 10
+    LOOP
+        count := count + 1;
+        RAISE NOTICE 'ID: %, Tipo: %, Descrição: %, Valor: %, Data: %', transac.id, transac.tipo, transac.descricao, transac.valor, transac.realizada_em;
+        EXIT WHEN count >= 10;
+    END LOOP;
+END;
+$$;
+
